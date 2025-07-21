@@ -1,103 +1,121 @@
-import Image from "next/image";
+"use client";
+import React, { useState, useRef } from "react";
+import {
+  Upload,
+  Play,
+  Download,
+  Github,
+  Globe,
+  ChevronDown,
+  CheckCircle,
+  Circle,
+  Loader2,
+  FileVideo,
+  Languages,
+  Volume2,
+  Smile,
+  Heart,
+  Frown,
+  Zap,
+} from "lucide-react";
+import Header from "./components/Headers/Header";
+import Footers from "./components/Footers/Footers";
 
-export default function Home() {
+interface DubbingStep {
+  id: string;
+  label: string;
+  status: "pending" | "processing" | "completed";
+}
+
+function App() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [sourceLanguage, setSourceLanguage] = useState("en");
+  const [targetLanguage, setTargetLanguage] = useState("es");
+  const [voiceGender, setVoiceGender] = useState("female");
+  const [emotionTone, setEmotionTone] = useState("neutral");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [outputVideo, setOutputVideo] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const dubbingSteps: DubbingStep[] = [
+    { id: "transcribe", label: "Transcribe", status: "pending" },
+    { id: "translate", label: "Translate", status: "pending" },
+    { id: "tts", label: "Generate Speech", status: "pending" },
+    { id: "merge", label: "Merge Audio", status: "pending" },
+    { id: "download", label: "Ready to Download", status: "pending" },
+  ];
+
+  const languages = [
+    { code: "en", name: "English" },
+    { code: "es", name: "Spanish" },
+    { code: "fr", name: "French" },
+    { code: "de", name: "German" },
+    { code: "it", name: "Italian" },
+    { code: "pt", name: "Portuguese" },
+    { code: "ru", name: "Russian" },
+    { code: "ja", name: "Japanese" },
+    { code: "ko", name: "Korean" },
+    { code: "zh", name: "Chinese" },
+  ];
+
+  const emotions = [
+    { value: "neutral", label: "Neutral", icon: Circle },
+    { value: "happy", label: "Happy", icon: Smile },
+    { value: "sad", label: "Sad", icon: Frown },
+    { value: "excited", label: "Excited", icon: Zap },
+  ];
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && files[0].type.startsWith("video/")) {
+      setSelectedFile(files[0]);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      setSelectedFile(files[0]);
+    }
+  };
+
+  const startDubbing = async () => {
+    if (!selectedFile) return;
+
+    setIsProcessing(true);
+    setCurrentStep(0);
+
+    // Simulate processing steps
+    for (let i = 0; i < dubbingSteps.length; i++) {
+      setCurrentStep(i);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+
+    setOutputVideo(URL.createObjectURL(selectedFile)); // Placeholder
+    setIsProcessing(false);
+  };
+
+  const getStepStatus = (
+    index: number,
+  ): "pending" | "processing" | "completed" => {
+    if (index < currentStep) return "completed";
+    if (index === currentStep && isProcessing) return "processing";
+    return "pending";
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+      {/* Header */}
+      <Header />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      {/* Footer */}
+      <Footers />
     </div>
   );
 }
+
+export default App;
